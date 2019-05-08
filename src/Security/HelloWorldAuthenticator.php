@@ -84,8 +84,18 @@ class HelloWorldAuthenticator extends AbstractFormLoginAuthenticator
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
-    {
+    {   
+        $credentials = $this->getCredentials($request);
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => $credentials['username']]);
+        $user_roles = $user->getRoles();
+
         $response = new RedirectResponse($this->router->generate('app_helloworld'));
+        for ($i=0; $i < sizeof($user_roles); $i++) { 
+            if ($user_roles[$i] == 'ROLE_USER_ADMIN') {
+                $response = new RedirectResponse($this->router->generate('user_index'));
+            }
+        }
+                
         return $response;
         
         
